@@ -31,7 +31,9 @@ async def start_help_message(message: types.Message):
 @dp.message_handler(IsAdmin(), commands="open_link")
 async def open_link(message: types.Message):
     args = message.get_args()
+    await message.delete()
     webbrowser.open(args, new=0, autoraise=True)
+    await message.answer(f"<i>Link going to open.\nLink: <code>{args}</code></i>", parse_mode='html')
 
 
 @dp.message_handler(IsAdmin(), commands="control")
@@ -53,7 +55,9 @@ async def type_text(message: types.Message):
 
 @dp.message_handler(IsAdmin(), commands="play_yt")
 async def play_yt(message: types.Message):
+    await message.delete()
     await utils.play_youtube_video(message.get_args())
+    await message.answer(f"<i>Video going to open.\nLink: <code>{message.get_args()}</code></i>", parse_mode='html')
 
 
 @dp.message_handler(IsAdmin(), commands="say")
