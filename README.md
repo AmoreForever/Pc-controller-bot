@@ -10,7 +10,7 @@ Start your bot
 
 <h1><img src="https://cdn-icons-png.flaticon.com/512/627/627495.png" height="54" align="middle"> Configuration</h1>
 
-Set bot token to your and to your user id in data.py
+Set bot token to your and to your user id in <a href='https://github.com/AmoreForever/pc-controller-bot/blob/master/data.py'>data.py</a>
 
 <pre lang='python'> 
 bot_settings = {'token': 'YOUR-BOT-TOKEN'}
