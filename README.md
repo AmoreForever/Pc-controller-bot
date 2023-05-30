@@ -17,6 +17,16 @@ bot_settings = {'token': 'YOUR-BOT-TOKEN'}
 
 tg_id = YOUR USER ID
 </pre>
+<h1><img src="https://cdn-icons-png.flaticon.com/512/4149/4149678.png" height="54" align="middle"> Commands</h1>
+
+Here are the commands that will help you manage your PC more easily
+
+<code>/commands</code> - Displays a menu to control your PC
+<code>/say <args></code> - Will he say something
+<code>/open_link <args></code> - Opens the link in the browser
+<code>/play_yt <args></code> - Open YouTuve video in the browser
+ 
+
 
 
 <h4>⚠️ I do not recommend touching the bot files so much and owner license</h4>
