@@ -1,0 +1,7 @@
+﻿pyttsx3
+aiogram
+keyboard
+aiogram
+pyautogui
+pycaw
+wmi
