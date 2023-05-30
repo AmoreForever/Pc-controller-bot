@@ -1,4 +1,4 @@
-<h1>Installing</h1>
+<h1><img src="https://cdn-icons-png.flaticon.com/512/3104/3104000.png" height="54" align="middle"> Installing</h1>
 
 Firstly you have to install requirements for using bot
 
