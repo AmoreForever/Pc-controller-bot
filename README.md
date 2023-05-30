@@ -18,3 +18,5 @@ bot_settings = {'token': 'YOUR-BOT-TOKEN'}
 tg_id = YOUR USER ID
 </pre>
 
+
+<h4>⚠️ I do not recommend touching the bot files so much and owner license</h4>
