@@ -1,11 +1,10 @@
-<h2><img src="https://cdn-icons-png.flaticon.com/512/3104/3104000.png" height="54" align="middle"> Installing</h2>
+<h1><img src="https://cdn-icons-png.flaticon.com/512/3104/3104000.png" height="54" align="middle"> Installing</h1>
 
 Firstly you have to install requirements for using bot
 
 <pre lang="bash"> pip install -r requirements.txt </pre>
-<br>
 
-<h1>Configuration</h1>
+<h1><img src="https://cdn-icons-png.flaticon.com/512/627/627495.png" height="54" align="middle"> Configuration</h1>
 
 Set bot token to your and to your user id in data.py
 
