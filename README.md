@@ -21,11 +21,12 @@ tg_id = YOUR USER ID
 
 Here are the commands that will help you manage your PC more easily
 
-<code>/commands</code> - Displays a menu to control your PC 
-<code>/say <args></code> - Will he say something 
-<code>/open_link <args></code> - Opens the link in the browser 
-<code>/play_yt <args></code> - Open YouTuve video in the browser 
- 
+<ul>
+ <li><code>/commands</code> - Displays a menu to control your PC</li>
+ <li><code>/say <args></code> - Will he say something</li>
+ <li><code>/open_link <args></code> - Opens the link in the browser</li>
+ <li><code>/play_yt <args></code> - Open YouTuve video in the browser</li>
+</ul>
 
 
 
