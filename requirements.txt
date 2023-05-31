@@ -5,3 +5,4 @@ aiogram
 pyautogui
 pycaw
 wmi
+lightdb
