@@ -255,6 +255,7 @@ async def startup(dp):
 
 
 async def start():
+    os.system('cls')
     text =  f"""
     
     █▀▀ █▀█ █▄ █ ▀█▀ █▀█ █▀█ █   █   █▀▀ █▀█
