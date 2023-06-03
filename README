@@ -10,7 +10,7 @@ Then install requirements
 
 Start your bot
 
-<pre lang="bash"> python3 main.py </pre>
+<b>Just open <i>start.sh</i> file</b>
 
 <h1><img src="https://cdn-icons-png.flaticon.com/512/627/627495.png" height="54" align="middle"> Configuration</h1>
 
@@ -23,18 +23,7 @@ tg_id = YOUR USER ID
 </pre>
 <h1><img src="https://cdn-icons-png.flaticon.com/512/4149/4149678.png" height="54" align="middle"> Commands</h1>
 
-Here are the commands that will help you manage your PC more easily
-
-<ul>
- <li><code>/help</code> - Help menu</li>
- <li><code>/control</code> - Displays a menu to control your PC</li>
- <li><code>/say </code> - Will he say something</li>
- <li><code>/open_link </code> - Opens the link in the browser</li>
- <li><code>/play_yt </code> - Open YouTuve video in the browser</li>
- <li><code>/apps </code> - Opens list of apps</li>
- <li><code>/addapp </code> - Add app to fast open</li>
- <li><code>/rmapp </code> - Remove app from list</li>
-</ul>
+When you send the <code>/help</code> command, you can get all the available commands
 
 
 

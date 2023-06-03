@@ -30,10 +30,11 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.WARNING,
     format="%(asctime)s|%(levelname)s|%(name)s|%(message)s",
-    datefmt='%Y-%m-%d|%H:%M:%S'
+    datefmt="%Y-%m-%d|%H:%M:%S",
 )
 
-@dp.message_handler(IsAdmin() ,commands='help')
+
+@dp.message_handler(IsAdmin(), commands="help")
 async def help_message(message: types.Message):
     text = (
         "<code>/control</code> - Displays a menu to control your PC\n"
@@ -44,7 +45,9 @@ async def help_message(message: types.Message):
         "<code>/addapp</code> - Add app to fast open\n"
         "<code>/rmapp</code> - Remove app from list\n"
     )
-    await message.answer(text, parse_mode='html')
+    await message.answer(text, parse_mode="html")
+
+
 @dp.message_handler(commands=["start"])
 async def start_message(message: types.Message):
     await message.reply_photo(
@@ -72,12 +75,20 @@ async def control(message: types.Message):
         reply_markup=markup.settings(),
     )
 
-@dp.message_handler(IsAdmin(), commands='apps')
+
+@dp.message_handler(IsAdmin(), commands="apps")
 async def open_apps(message: types.Message):
     if not db.get_apps():
-        await message.answer("<b>🧐 It looks like you haven't added any apps yet</b>", parse_mode="HTML")
+        await message.answer(
+            "<b>🧐 It looks like you haven't added any apps yet</b>", parse_mode="HTML"
+        )
     else:
-        await message.answer("<b>👩‍🎤 Below are your applications that you can open</b>", parse_mode='html', reply_markup=markup.apps())
+        await message.answer(
+            "<b>👩‍🎤 Below are your applications that you can open</b>",
+            parse_mode="html",
+            reply_markup=markup.apps(),
+        )
+
 
 @dp.message_handler(IsAdmin(), commands="type")
 async def type_text(message: types.Message):
@@ -95,6 +106,7 @@ async def type_text(message: types.Message):
             parse_mode="html",
         )
 
+
 @dp.message_handler(IsAdmin(), commands="play_yt")
 async def play_yt(message: types.Message):
     await message.delete()
@@ -104,6 +116,7 @@ async def play_yt(message: types.Message):
         parse_mode="html",
     )
 
+
 @dp.message_handler(IsAdmin(), commands="addapp")
 async def add_application(message: types.Message):
     args = message.get_args().split(" | ")
@@ -111,25 +124,35 @@ async def add_application(message: types.Message):
         text = (
             "<i>⚠️ Specify the arguments correctly</i>\n"
             r"<i>🦮 Here is an example</i>: <code>Telegram | C:\Users\Amore\AppData\Roaming\64Gram Desktop\Telegram.exe</code>"
-            
         )
-        await message.answer(text, parse_mode='html')
+        await message.answer(text, parse_mode="html")
     if args[0] and args[1]:
         try:
             db.add_app(path=args[1], name=args[0])
-            await message.answer(f"👍 <b>The application {args[0]} has been successfully added to the list</b>", parse_mode='html')
+            await message.answer(
+                f"👍 <b>The application {args[0]} has been successfully added to the list</b>",
+                parse_mode="html",
+            )
         except Exception as e:
             await message.answer(f"Error: {e}")
 
-@dp.message_handler(IsAdmin(), commands='rmapp')
+
+@dp.message_handler(IsAdmin(), commands="rmapp")
 async def rm_app(message: types.Message):
     args = message.get_args()
     if args not in db.get_apps():
-        await message.answer("<b>🙅‍♀️ There is no such application in the database</b>", parse_mode='html')
+        await message.answer(
+            "<b>🙅‍♀️ There is no such application in the database</b>",
+            parse_mode="html",
+        )
     if args in db.get_apps():
         db.del_app(args)
-        await message.answer("<i>✔️ The application was successfully removed from the list</i>", parse_mode='html')
-        
+        await message.answer(
+            "<i>✔️ The application was successfully removed from the list</i>",
+            parse_mode="html",
+        )
+
+
 @dp.message_handler(IsAdmin(), commands="say")
 async def say_message(message: types.Message):
     args = message.get_args()
@@ -198,20 +221,31 @@ async def callbacks(call: types.CallbackQuery):
         )
         await utils.delete_all()
     if "app" in call.data:
-        ind = call.data.index('-app')
+        ind = call.data.index("-app")
         app = call.data[:ind]
         get_path = db.get_path(str(app))
         try:
             utils.open_application(get_path)
-            await call.message.edit_text(f"<b>💫 The <code>{app}</code> app opens</b>", parse_mode='HTML', reply_markup=markup.back_apps())
+            await call.message.edit_text(
+                f"<b>💫 The <code>{app}</code> app opens</b>",
+                parse_mode="HTML",
+                reply_markup=markup.back_apps(),
+            )
         except FileNotFoundError:
-            await call.message.edit_text("🚫 <b>The file directory is specified incorrectly or it does not exist</b>", reply_markup=markup.delete(app), parse_mode='html')
-        
-    if 'rm' in call.data:
+            await call.message.edit_text(
+                "🚫 <b>The file directory is specified incorrectly or it does not exist</b>",
+                reply_markup=markup.delete(app),
+                parse_mode="html",
+            )
+
+    if "rm" in call.data:
         ind = call.data.index("-rm")
         item = call.data[:ind]
         db.del_app(item)
-        await call.message.edit_text("<i>✔️ The application was successfully removed from the list</i>", parse_mode='html')
+        await call.message.edit_text(
+            "<i>✔️ The application was successfully removed from the list</i>",
+            parse_mode="html",
+        )
     if "brightness" in call.data:
         ind = call.data.index("-brightness")
         br = call.data[:ind]
@@ -250,34 +284,40 @@ async def callbacks(call: types.CallbackQuery):
             )
             pyautogui.press("enter")
 
+
 async def startup(dp):
-    await dp.bot.send_message(data.tg_id, text=f"<b>🌑 Your PC is turned on and ready to use</b>\n\n<b>⌛ Now: <code>{datetime.datetime.now()}</code></b>", parse_mode='HTML', disable_notification=True)
+    await dp.bot.send_message(
+        data.tg_id,
+        text=f"<b>🌑 Your PC is turned on and ready to use</b>\n\n<b>⌛ Now: <code>{datetime.datetime.now()}</code></b>",
+        parse_mode="HTML",
+        disable_notification=True,
+    )
 
 
 async def start():
-    text =  f"""
-    
-    █▀▀ █▀█ █▄ █ ▀█▀ █▀█ █▀█ █   █   █▀▀ █▀█
-    █▄▄ █▄█ █ ▀█  █  █▀▄ █▄█ █▄▄ █▄▄ ██▄ █▀▄
-    
-    🦋 Version: {version.version}
-    🌳 GitHub commit SHA: {version.get_latest_commit_sha()}
-    💬 Commands: {len(commands.find_commands_in_file())}
-    🦉 Owner: {data.tg_id}
-    
-    """
-
-    logger.warning(text)
+    vers = version.version
+    sha = version.get_latest_commit_sha()
+    comm = len(commands.find_commands_in_file())
+    owner = data.tg_id
+    logger.warning(vers)
+    logger.warning(sha)
+    logger.warning(comm)
+    logger.warning(owner)
     await dp.start_polling(bot)
+
 
 async def main():
     f2 = loop.create_task(start())
     f3 = loop.create_task(startup(dp))
     await asyncio.wait([f2, f3])
-    
+
+
 try:
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
     loop.close()
 except Exception:
     pass
+                           
+                                                                                       
+                                                                                       
