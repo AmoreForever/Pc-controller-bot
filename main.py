@@ -8,6 +8,7 @@
 import misc.utils as utils
 import misc.version as version
 import misc.commands as commands
+import platform
 import pyttsx3
 import pyautogui
 import logging
@@ -28,9 +29,8 @@ dp = Dispatcher(bot)
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    level=logging.WARNING,
-    format="%(asctime)s|%(levelname)s|%(name)s|%(message)s",
-    datefmt="%Y-%m-%d|%H:%M:%S",
+    level=logging.INFO,
+    format="[%(levelname)s] %(message)s",
 )
 
 
@@ -292,17 +292,15 @@ async def startup(dp):
         parse_mode="HTML",
         disable_notification=True,
     )
+    logger.info('- Notification sent to the owner')
 
 
 async def start():
-    vers = version.version
-    sha = version.get_latest_commit_sha()
-    comm = len(commands.find_commands_in_file())
-    owner = data.tg_id
-    logger.warning(vers)
-    logger.warning(sha)
-    logger.warning(comm)
-    logger.warning(owner)
+    logger.info("- Version: %s", version.version)
+    logger.info("- Owner: %s", data.tg_id)
+    logger.info("- Last commit: %s", version.get_latest_commit_sha())
+    logger.info("- Number of commands: %s", len(commands.find_commands_in_file()))
+    logger.info("- Release: %s %s", platform.system(), platform.release())
     await dp.start_polling(bot)
 
 
@@ -318,6 +316,3 @@ try:
     loop.close()
 except Exception:
     pass
-                           
-                                                                                       
-                                                                                       
