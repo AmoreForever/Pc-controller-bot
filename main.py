@@ -5,26 +5,30 @@
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 # 👤 https://t.me/hikamoru
 
+import asyncio
+import platform
+import datetime
+import logging
+import os
+import subprocess
+import sys
+import webbrowser
+import contextlib
+import aioschedule
+import pyttsx3
+import pyautogui
+import dir
+import data
 import misc.utils as utils
 import misc.version as version
 import misc.commands as commands
-import platform
-import pyttsx3
-import pyautogui
-import logging
-import os
-import asyncio
-import data
 import misc.markup as markup
-import webbrowser
-import datetime
 from db import db
-
+from git import Repo
 from misc.filters import IsAdmin
-from data import bot_settings
 from aiogram import Bot, Dispatcher, types
 
-bot = Bot(f"{bot_settings['token']}")
+bot = Bot(f"{data.bot_settings['token']}")
 dp = Dispatcher(bot)
 
 logger = logging.getLogger(__name__)
@@ -162,7 +166,6 @@ async def say_message(message: types.Message):
     engine.stop()
     await message.delete()
 
-
 @dp.callback_query_handler(IsAdmin())
 async def callbacks(call: types.CallbackQuery):
     if call.data == "screenshot":
@@ -284,7 +287,6 @@ async def callbacks(call: types.CallbackQuery):
             )
             pyautogui.press("enter")
 
-
 async def startup(dp):
     await dp.bot.send_message(
         data.tg_id,
@@ -292,27 +294,47 @@ async def startup(dp):
         parse_mode="HTML",
         disable_notification=True,
     )
-    logger.info('- Notification sent to the owner')
+    logger.info("- Notification sent to the owner")
 
 
-async def start():
+async def starts():
     logger.info("- Version: %s", version.version)
     logger.info("- Owner: %s", data.tg_id)
     logger.info("- Last commit: %s", version.get_latest_commit_sha())
     logger.info("- Number of commands: %s", len(commands.find_commands_in_file()))
     logger.info("- Release: %s %s", platform.system(), platform.release())
     await dp.start_polling(bot)
+    await dp.stop_polling()
 
+async def checker():
+    if version.get_latest_commit_sha() == db.get_commit():
+        return False
+    await bot.send_animation(chat_id=data.tg_id, animation="https://te.legra.ph/file/63663a6f1791dcfe33108.mp4", caption='<b>🔄 Hooray, a new update has come out, we urgently need to update\n🔼 Please run command <code>git pull</code> in your terminal then run the bot</b>', reply_markup=markup.update(), parse_mode='html')
+    open('db/ssha.txt', 'w').write(version.get_latest_commit_sha())
+    
 
+async def got_scheduled():
+    aioschedule.every(60).seconds.do(checker)
+    while True:
+        await aioschedule.run_pending()
+        await asyncio.sleep(2)
+        
+async def on_startup():
+    asyncio.create_task(got_scheduled())
+    
 async def main():
-    f2 = loop.create_task(start())
+    f2 = loop.create_task(starts())
+    f1 = loop.create_task(on_startup())
     f3 = loop.create_task(startup(dp))
-    await asyncio.wait([f2, f3])
+    await asyncio.wait([f2, f1, f3])
 
 
-try:
+with contextlib.suppress(Exception):
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
     loop.close()
+<<<<<<< Updated upstream
 except Exception:
     pass
+=======
+>>>>>>> Stashed changes

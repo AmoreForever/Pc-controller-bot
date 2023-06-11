@@ -48,3 +48,7 @@ async def brightness(lvl):
 
 def open_application(application_path):
     subprocess.Popen(application_path)
+
+
+
+# os.system(f"cd {get_base_dir()} && cd .. && git reset --hard HEAD")

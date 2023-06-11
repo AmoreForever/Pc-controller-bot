@@ -22,3 +22,6 @@ def get_apps():
 
 def get_path(name):
     return db.get_key(name, "path")
+
+def get_commit():
+    return open('db/ssha.txt', 'r').read()

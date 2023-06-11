@@ -80,3 +80,9 @@ def enter_or_delete(what):
     home = InlineKeyboardButton(text="🏘 Home",callback_data="home")
     markup.add(home)
     return markup
+
+def update():
+    markup = InlineKeyboardMarkup()
+    can = InlineKeyboardButton(text='🔻 Close', callback_data='close')
+    markup.add(can)
+    return markup

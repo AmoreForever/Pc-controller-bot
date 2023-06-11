@@ -11,5 +11,5 @@ def get_latest_commit_sha():
             return sha[:7]  # Сокращенный хэш
     return None
 
-version = "1 1 2"
+version = "1 1 3"
 
