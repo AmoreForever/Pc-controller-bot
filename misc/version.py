@@ -4,7 +4,7 @@ import time
 CACHE_TIMEOUT = 60   # Cache timeout in seconds
 cache_expires_at = 0  # When the cache expires
 cached_sha = None     # Cached sha value
-headers = {"Authorization": f"Token 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"}
+headers = {"Authorization": f"Token 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"}
 def get_latest_commit_sha():
     global cache_expires_at, cached_sha
     

@@ -327,7 +327,7 @@ async def checker():
     await bot.send_animation(
         chat_id=data.tg_id,
         animation="https://te.legra.ph/file/63663a6f1791dcfe33108.mp4",
-        caption=f"<b>🔄 Hooray, a new update has come out, we urgently need to update\n<b>📦 Commit: </a href='https://github.com/AmoreForever/pc-controller-bot/commit/{version.get_latest_commit_sha()}'>{version.get_latest_commit_sha()}</a></b>",
+        caption=f"<b>🔄 Hooray, a new update has come out, we urgently need to update</b>\n<b>📦 Commit: <a href='https://github.com/AmoreForever/pc-controller-bot/commit/{version.get_latest_commit_sha()}'>{version.get_latest_commit_sha()}</a></b>",
         reply_markup=markup.update(),
         parse_mode="html",
     )
