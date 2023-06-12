@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from db import db
+from db import apps as sapps
 
 def settings():
     markup = InlineKeyboardMarkup()
@@ -28,7 +28,7 @@ def brightness():
 
 def apps():
     buttons = []
-    apps = db.get_apps()
+    apps = sapps.get_apps()
     markup = InlineKeyboardMarkup()
     for item in apps:
         button_text = f"▫{item}"
@@ -83,6 +83,7 @@ def enter_or_delete(what):
 
 def update():
     markup = InlineKeyboardMarkup()
+    upd = InlineKeyboardButton(text="🔄 Update", callback_data='update')
     can = InlineKeyboardButton(text='🔻 Close', callback_data='close')
-    markup.add(can)
+    markup.add(upd, can)
     return markup

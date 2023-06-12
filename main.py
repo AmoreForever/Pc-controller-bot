@@ -10,21 +10,17 @@ import platform
 import datetime
 import logging
 import os
-import subprocess
-import sys
 import webbrowser
-import contextlib
 import aioschedule
 import pyttsx3
 import pyautogui
-import dir
 import data
 import misc.utils as utils
 import misc.version as version
 import misc.commands as commands
 import misc.markup as markup
-from db import db
-from git import Repo
+from db import apps
+from db import maindb
 from misc.filters import IsAdmin
 from aiogram import Bot, Dispatcher, types
 
@@ -82,7 +78,7 @@ async def control(message: types.Message):
 
 @dp.message_handler(IsAdmin(), commands="apps")
 async def open_apps(message: types.Message):
-    if not db.get_apps():
+    if not apps.get_apps():
         await message.answer(
             "<b>🧐 It looks like you haven't added any apps yet</b>", parse_mode="HTML"
         )
@@ -132,7 +128,7 @@ async def add_application(message: types.Message):
         await message.answer(text, parse_mode="html")
     if args[0] and args[1]:
         try:
-            db.add_app(path=args[1], name=args[0])
+            apps.add_app(path=args[1], name=args[0])
             await message.answer(
                 f"👍 <b>The application {args[0]} has been successfully added to the list</b>",
                 parse_mode="html",
@@ -144,13 +140,13 @@ async def add_application(message: types.Message):
 @dp.message_handler(IsAdmin(), commands="rmapp")
 async def rm_app(message: types.Message):
     args = message.get_args()
-    if args not in db.get_apps():
+    if args not in apps.get_apps():
         await message.answer(
             "<b>🙅‍♀️ There is no such application in the database</b>",
             parse_mode="html",
         )
-    if args in db.get_apps():
-        db.del_app(args)
+    if args in apps.get_apps():
+        apps.del_app(args)
         await message.answer(
             "<i>✔️ The application was successfully removed from the list</i>",
             parse_mode="html",
@@ -166,8 +162,17 @@ async def say_message(message: types.Message):
     engine.stop()
     await message.delete()
 
+
 @dp.callback_query_handler(IsAdmin())
 async def callbacks(call: types.CallbackQuery):
+    if call.data == "update":
+        await call.message.delete()
+        s = await call.message.answer(
+            "🔄 <b>Your bot is being updated</b>", parse_mode="html"
+        )
+        maindb.set_on_off("false")
+        maindb.set_message_id(s.message_id)
+        os.system("git pull && python main.py")
     if call.data == "screenshot":
         await utils.screenshot()
         await call.message.answer_photo(
@@ -226,7 +231,7 @@ async def callbacks(call: types.CallbackQuery):
     if "app" in call.data:
         ind = call.data.index("-app")
         app = call.data[:ind]
-        get_path = db.get_path(str(app))
+        get_path = apps.get_path(str(app))
         try:
             utils.open_application(get_path)
             await call.message.edit_text(
@@ -244,7 +249,7 @@ async def callbacks(call: types.CallbackQuery):
     if "rm" in call.data:
         ind = call.data.index("-rm")
         item = call.data[:ind]
-        db.del_app(item)
+        apps.del_app(item)
         await call.message.edit_text(
             "<i>✔️ The application was successfully removed from the list</i>",
             parse_mode="html",
@@ -287,13 +292,23 @@ async def callbacks(call: types.CallbackQuery):
             )
             pyautogui.press("enter")
 
+
 async def startup(dp):
-    await dp.bot.send_message(
-        data.tg_id,
-        text=f"<b>🌑 Your PC is turned on and ready to use</b>\n\n<b>⌛ Now: <code>{datetime.datetime.now()}</code></b>",
-        parse_mode="HTML",
-        disable_notification=True,
-    )
+    if maindb.get_on_off() == "false":
+        await bot.edit_message_text(
+            text="✅ <b>Your bot has been successfully updated</b>",
+            message_id=maindb.get_message_id(),
+            chat_id=data.tg_id,
+            parse_mode="html",
+        )
+        maindb.set_on_off("true")
+    if maindb.get_on_off() == "true":
+        await dp.bot.send_message(
+            data.tg_id,
+            text=f"<b>🌑 Your PC is turned on and ready to use</b>\n\n<b>⌛ Now: <code>{datetime.datetime.now()}</code></b>",
+            parse_mode="HTML",
+            disable_notification=True,
+        )
     logger.info("- Notification sent to the owner")
 
 
@@ -304,24 +319,32 @@ async def starts():
     logger.info("- Number of commands: %s", len(commands.find_commands_in_file()))
     logger.info("- Release: %s %s", platform.system(), platform.release())
     await dp.start_polling(bot)
-    await dp.stop_polling()
+
 
 async def checker():
-    if version.get_latest_commit_sha() == db.get_commit():
+    if version.get_latest_commit_sha() == apps.get_commit():
         return False
-    await bot.send_animation(chat_id=data.tg_id, animation="https://te.legra.ph/file/63663a6f1791dcfe33108.mp4", caption='<b>🔄 Hooray, a new update has come out, we urgently need to update\n🔼 Please run command <code>git pull</code> in your terminal then run the bot</b>', reply_markup=markup.update(), parse_mode='html')
-    open('db/ssha.txt', 'w').write(version.get_latest_commit_sha())
-    
+    await bot.send_animation(
+        chat_id=data.tg_id,
+        animation="https://te.legra.ph/file/63663a6f1791dcfe33108.mp4",
+        caption=f"<b>🔄 Hooray, a new update has come out, we urgently need to update\n<b>📦 Commit: </a href='https://github.com/AmoreForever/pc-controller-bot/commit/{version.get_latest_commit_sha()}'>{version.get_latest_commit_sha()}</a></b>",
+        reply_markup=markup.update(),
+        parse_mode="html",
+    )
+    open("db/ssha.txt", "w").write(version.get_latest_commit_sha())
+
 
 async def got_scheduled():
     aioschedule.every(60).seconds.do(checker)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(2)
-        
+
+
 async def on_startup():
     asyncio.create_task(got_scheduled())
-    
+
+
 async def main():
     f2 = loop.create_task(starts())
     f1 = loop.create_task(on_startup())

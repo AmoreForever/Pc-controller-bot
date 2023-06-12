@@ -1,11 +1,10 @@
 import wmi
 import webbrowser
 import ctypes
-import os
 import subprocess
 import keyboard
 import pyautogui
-from ctypes import cast, POINTER, c_float
+from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
@@ -20,8 +19,6 @@ async def control_volume(percent):
     volume.SetMasterVolumeLevelScalar(new_volume, None)
 
 
-
-            
 async def lock_screen():
     ctypes.windll.user32.LockWorkStation()
 
@@ -29,26 +26,26 @@ async def lock_screen():
 async def play_youtube_video(youtube_url):
     webbrowser.open(youtube_url)
 
+
 async def screenshot():
     screenshot = pyautogui.screenshot()
-    screenshot.save('s.png')
-    
+    screenshot.save("s.png")
+
+
 async def delete_all():
     pyautogui.click()
-    keyboard.press('ctrl')
-    keyboard.press('a')
-    keyboard.release('a')
-    keyboard.release('ctrl')
-    pyautogui.press('backspace')
+    keyboard.press("ctrl")
+    keyboard.press("a")
+    keyboard.release("a")
+    keyboard.release("ctrl")
+    pyautogui.press("backspace")
+
 
 async def brightness(lvl):
     c = wmi.WMI(namespace="wmi")
     methods = c.WmiMonitorBrightnessMethods()[0]
     methods.WmiSetBrightness(lvl, 0)
 
+
 def open_application(application_path):
     subprocess.Popen(application_path)
-
-
-
-# os.system(f"cd {get_base_dir()} && cd .. && git reset --hard HEAD")

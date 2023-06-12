@@ -1,6 +1,6 @@
 from lightdb import LightDB
 
-db = LightDB("db/db.json")
+db = LightDB("db/apps.json")
 
 
 def add_app(path, name):
