@@ -52,7 +52,7 @@ async def help_message(message: types.Message):
 async def start_message(message: types.Message):
     await message.reply_photo(
         photo="https://te.legra.ph/file/c17dd46d43541e06cb66f.jpg",
-        caption="<b>🌘 Hi, you can control your computer with this bot\n❓ Do you want the same bot for yourself?\n\n<a href='https://github.com/AmoreForever/pc-controller-bot'>🌍 Repo of this bot</a></b>",
+        caption="<b>🌘 Wassup, you can control your computer with this bot\n❓ Do you want the same bot for yourself?\n\n<a href='https://github.com/AmoreForever/pc-controller-bot'>🌍 Repo of this bot</a></b>",
         parse_mode="HTML",
     )
 
