@@ -329,12 +329,9 @@ async def main():
     await asyncio.wait([f2, f1, f3])
 
 
-with contextlib.suppress(Exception):
+try:
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
     loop.close()
-<<<<<<< Updated upstream
 except Exception:
     pass
-=======
->>>>>>> Stashed changes
