@@ -96,7 +96,7 @@ async def type_text(message: types.Message):
     try:
         pyautogui.typewrite(str(args))
         await message.answer(
-            text=f"<i>Are you sure you want to send a text: <code>{args}</code></i>",
+            text=f"<i>🐱‍👤 Are you sure you want to send a text: <code>{args}</code></i>",
             parse_mode="html",
             reply_markup=markup.enter_or_delete("type"),
         )
