@@ -4,6 +4,8 @@ import ctypes
 import subprocess
 import keyboard
 import pyautogui
+import psutil
+import os
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
@@ -49,3 +51,7 @@ async def brightness(lvl):
 
 def open_application(application_path):
     subprocess.Popen(application_path)
+
+def check_battery():
+    return psutil.sensors_battery().percent
+

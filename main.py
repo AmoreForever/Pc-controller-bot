@@ -5,6 +5,7 @@
 # 🌐 https://www.gnu.org/licenses/agpl-3.0.html
 # 👤 https://t.me/hikamoru
 
+
 import asyncio
 import platform
 import datetime
@@ -19,24 +20,36 @@ import misc.utils as utils
 import misc.version as version
 import misc.commands as commands
 import misc.markup as markup
+import pygments
+from pygments.formatters import ImageFormatter
+from pygments.lexers import Python3Lexer
 from db import apps
 from db import maindb
 from misc.filters import IsAdmin
 from aiogram import Bot, Dispatcher, types
+from aiogram.utils.exceptions import BadRequest
 
 bot = Bot(f"{data.bot_settings['token']}")
 dp = Dispatcher(bot)
 
-logger = logging.getLogger(__name__)
+
 logging.basicConfig(
+    filename="bot.log",
+    filemode="a",
+    format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
+    datefmt="%H:%M:%S",
     level=logging.INFO,
-    format="[%(levelname)s] %(message)s",
 )
+
+logger = logging.getLogger("Bot")
 
 
 @dp.message_handler(IsAdmin(), commands="help")
 async def help_message(message: types.Message):
     text = (
+        "<code>/logs</code> - Get logs\n"
+        "<code>/restart</code> - Restart the bot\n"
+        "<code>/update</code> - Update the bot\n"
         "<code>/control</code> - Displays a menu to control your PC\n"
         "<code>/say</code> - Will he say something\n"
         "<code>/open_link</code>  - Opens the link in the browser\n"
@@ -48,6 +61,43 @@ async def help_message(message: types.Message):
     await message.answer(text, parse_mode="html")
 
 
+@dp.message_handler(IsAdmin(), commands="restart")
+async def restart_cmd(message: types.Message):
+    args = message.get_args()
+    if args == "-i":
+        s = await message.answer(
+            "<b>🔄 Your bot going to restart...</b>", parse_mode="html"
+        )
+        await asyncio.sleep(6)
+        await s.edit_text("<b>✅ Your bot restarted</b>", parse_mode="html")
+        os.system("python3 main.py")
+    if not args:
+        await message.answer(
+            "❓ <b>Are you sure you want to restart?</b>",
+            parse_mode="html",
+            reply_markup=markup.confirmation("bot_restart"),
+        )
+
+
+@dp.message_handler(IsAdmin(), commands="update")
+async def update_cmd(message: types.Message):
+    args = message.get_args()
+    if args == "-i":
+        s = await message.answer(
+            "<b>🔄 Your bot going to update...</b>", parse_mode="html"
+        )
+        await asyncio.sleep(6)
+        await s.edit_text("<b>✅ Your bot updated</b>", parse_mode="html")
+        os.system("git pull")
+        os.system("python3 main.py")
+    if not args:
+        await message.answer(
+            "❓ <b>Are you sure you want to update?</b>",
+            parse_mode="html",
+            reply_markup=markup.confirmation("bot_update"),
+        )
+
+
 @dp.message_handler(commands=["start"])
 async def start_message(message: types.Message):
     await message.reply_photo(
@@ -55,6 +105,30 @@ async def start_message(message: types.Message):
         caption="<b>🌘 Wassup, you can control your computer with this bot\n❓ Do you want the same bot for yourself?\n\n<a href='https://github.com/AmoreForever/pc-controller-bot'>🌍 Repo of this bot</a></b>",
         parse_mode="HTML",
     )
+
+
+async def get_log_file():
+    file = open("bot.log", "r", encoding="utf-8")
+    pygments.highlight(
+        file.read(),
+        Python3Lexer(),
+        ImageFormatter(line_numbers=True),
+        "fileScreenshot.png",
+    )
+    
+
+
+@dp.message_handler(IsAdmin(), commands="logs")
+async def logs(message: types.Message):
+    try:
+        await message.answer_document(
+            document=open("bot.log", "rb"),
+            caption="<b>📜 Here are the logs</b>",
+            parse_mode="html",
+            reply_markup=markup.log_screen(),
+        )
+    except BadRequest:  # return if file is empty
+        await message.answer("<b>📜 Logs are empty</b>", parse_mode="html")
 
 
 @dp.message_handler(IsAdmin(), commands="open_link")
@@ -165,6 +239,20 @@ async def say_message(message: types.Message):
 
 @dp.callback_query_handler(IsAdmin())
 async def callbacks(call: types.CallbackQuery):
+    if call.data == "clear_logs":
+        await call.message.delete()
+        open("bot.log", "w").close()
+        await call.message.answer(
+            "<i>📜 <b>Logs cleared successfully</b></i>", parse_mode="html"
+        )
+    if call.data == "scrn_logs":
+        await get_log_file()
+        await call.message.answer_document(
+            open("fileScreenshot.png", "rb"),
+            caption="📜 <b>Here are the logs</b>",
+            parse_mode="html",
+        )
+        os.remove("fileScreenshot.png")
     if call.data == "update":
         await call.message.delete()
         s = await call.message.answer(
@@ -291,6 +379,25 @@ async def callbacks(call: types.CallbackQuery):
                 "<i>The text was written successfully</i>", parse_mode="html"
             )
             pyautogui.press("enter")
+        elif comm == "bot_restart":
+            d = await call.message.edit_text(
+                "<b>🔄 Your bot going to restart...</b>", parse_mode="html"
+            )
+            await asyncio.sleep(6)
+            await d.edit_text("<b>✅ Your bot restarted</b>", parse_mode="html")
+            os.system("python3 main.py")
+
+        elif comm == "bot_update":
+            d = await call.message.edit_text(
+                "<b>🔄 Your bot going to update...</b>", parse_mode="html"
+            )
+            await asyncio.sleep(6)
+            await d.edit_text("<b>✅ Your bot updated</b>", parse_mode="html")
+            os.system("git pull")
+            os.system("python3 main.py")
+
+
+
 
 
 async def startup(dp):
@@ -305,7 +412,7 @@ async def startup(dp):
     if maindb.get_on_off() == "true":
         await dp.bot.send_message(
             data.tg_id,
-            text=f"<b>🌑 Your PC is turned on and ready to use</b>\n\n<b>⌛ Now: <code>{datetime.datetime.now()}</code></b>",
+            text=f"<b>🌑 Bot started and ready to use</b>\n\n<b>⌛ Now: <code>{datetime.datetime.now()}</code></b>",
             parse_mode="HTML",
             disable_notification=True,
         )
@@ -313,29 +420,26 @@ async def startup(dp):
 
 
 async def starts():
-    logger.info("- Version: %s", version.version)
-    logger.info("- Owner: %s", data.tg_id)
-    logger.info("- Last commit: %s", version.get_latest_commit_sha())
-    logger.info("- Number of commands: %s", len(commands.find_commands_in_file()))
-    logger.info("- Release: %s %s", platform.system(), platform.release())
-    await dp.start_polling(bot)
+        logger.info("- Version: %s", version.version)
+        logger.info("- Owner: %s", data.tg_id)
+        logger.info("- Number of commands: %s", len(commands.find_commands_in_file()))
+        logger.info("- Release: %s %s", platform.system(), platform.release())
+        await dp.start_polling(bot)
 
 
-async def checker():
-    if version.get_latest_commit_sha() == apps.get_commit():
-        return False
-    await bot.send_animation(
-        chat_id=data.tg_id,
-        animation="https://te.legra.ph/file/63663a6f1791dcfe33108.mp4",
-        caption=f"<b>🔄 Hooray, a new update has come out, we urgently need to update</b>\n<b>📦 Commit: <a href='https://github.com/AmoreForever/pc-controller-bot/commit/{version.get_latest_commit_sha()}'>{version.get_latest_commit_sha()}</a></b>",
-        reply_markup=markup.update(),
-        parse_mode="html",
-    )
-    open("db/ssha.txt", "w").write(version.get_latest_commit_sha())
+async def battery():
+    if utils.check_battery() <= 20:  # type: ignore
+        await bot.send_message(
+            data.tg_id,
+            text=f"<b>🪫 Your battery is low, please charge it</b>\n\n<b>⌛ Now: <code>{datetime.datetime.now()}</code></b>",
+            parse_mode="HTML",
+            disable_notification=True,
+        )
+    await asyncio.sleep(60)
 
 
 async def got_scheduled():
-    aioschedule.every(60).seconds.do(checker)
+    aioschedule.every(30).seconds.do(battery)
     while True:
         await aioschedule.run_pending()
         await asyncio.sleep(2)
@@ -349,12 +453,10 @@ async def main():
     f2 = loop.create_task(starts())
     f1 = loop.create_task(on_startup())
     f3 = loop.create_task(startup(dp))
-    await asyncio.wait([f2, f1, f3])
+    await asyncio.wait([f1, f2, f3])
 
 
-try:
+if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-    loop.close()
-except Exception:
-    pass
+    loop.run_forever()      

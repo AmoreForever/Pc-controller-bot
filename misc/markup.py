@@ -6,7 +6,7 @@ def settings():
     shutdown = InlineKeyboardButton(text='🔽 Shutdown', callback_data='shutdown')
     restart = InlineKeyboardButton(text='🔄 Restart', callback_data='restart')
     lock = InlineKeyboardButton(text='🔒 Lock', callback_data='lock')
-    brightness = InlineKeyboardButton(text='🔆 Brightness', callback_data='set-br')
+    brightness = InlineKeyboardButton(text='🔆 Brightness', callback_data='set-br') # type: ignore
     volume = InlineKeyboardButton(text='🔊 Volume', callback_data='set-vol')
     screen_shot = InlineKeyboardButton(text="📺 Screenshot", callback_data='screenshot')
     markup.add(brightness, volume, screen_shot)
@@ -86,4 +86,11 @@ def update():
     upd = InlineKeyboardButton(text="🔄 Update", callback_data='update')
     can = InlineKeyboardButton(text='🔻 Close', callback_data='close')
     markup.add(upd, can)
+    return markup
+
+def log_screen():
+    markup = InlineKeyboardMarkup()
+    clear = InlineKeyboardButton(text='🗑 Clear', callback_data='clear_logs')
+    screen = InlineKeyboardButton(text='📺 Screenshot', callback_data='scrn_logs')
+    markup.add(screen, clear)
     return markup
