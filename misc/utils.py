@@ -5,7 +5,7 @@ import subprocess
 import keyboard
 import pyautogui
 import psutil
-import os
+import mouse
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
@@ -42,6 +42,13 @@ async def delete_all():
     keyboard.release("ctrl")
     pyautogui.press("backspace")
 
+async def type_text(text):
+    if text == "backspace":
+        pyautogui.press("backspace")
+    else:
+        # pyautogui.write(text)
+        keyboard.write(text)
+
 
 async def brightness(lvl):
     c = wmi.WMI(namespace="wmi")
@@ -55,3 +62,22 @@ def open_application(application_path):
 def check_battery():
     return psutil.sensors_battery().percent
 
+
+async def mouse_down():
+    currentMouseX,  currentMouseY  =  mouse.get_position()
+    mouse.move(currentMouseX,  currentMouseY - 50)
+
+async def mouse_up():
+    currentMouseX,  currentMouseY  =  mouse.get_position()
+    mouse.move(currentMouseX,  currentMouseY + 50)
+
+async def mouse_left():
+    currentMouseX,  currentMouseY  =  mouse.get_position()
+    mouse.move(currentMouseX - 50,  currentMouseY)
+
+async def mouse_right():
+    currentMouseX,  currentMouseY  =  mouse.get_position()
+    mouse.move(currentMouseX + 50,  currentMouseY)
+
+async def mouse_click():
+    mouse.click()

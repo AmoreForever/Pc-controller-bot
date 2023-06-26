@@ -1,5 +1,130 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from string import ascii_lowercase, ascii_uppercase, digits, punctuation, ascii_letters
 from db import apps as sapps
+
+ru_keyboad_layout = "ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ,."
+ru_keyboad_layout_lower = ru_keyboad_layout.lower()
+keyboard_layout = "QWERTYUIOPASDFGHJKLZXCVBNM,."
+keyboard_layout_lower = keyboard_layout.lower()
+
+
+def live():
+    markup = InlineKeyboardMarkup(row_width=2)
+    start = InlineKeyboardButton(text="▶️ Start", callback_data="start-live")
+    stop = InlineKeyboardButton(text="⏹ Stop", callback_data="stop-live")
+    markup.add(start, stop)
+    return markup
+def mouse_control():
+    markup = InlineKeyboardMarkup(row_width=3)
+    none_keyb = InlineKeyboardButton(text="▪", callback_data='None')
+    up = InlineKeyboardButton(text="⬆️", callback_data="up-mouse")
+    press = InlineKeyboardButton(text="🖱", callback_data="press-mouse")
+    down = InlineKeyboardButton(text="⬇️", callback_data="down-mouse")
+    left = InlineKeyboardButton(text="⬅️", callback_data="left-mouse")
+    right = InlineKeyboardButton(text="➡️", callback_data="right-mouse")
+    markup.add(none_keyb, up, none_keyb)
+    markup.add(left, press, right)
+    markup.add(none_keyb, down, none_keyb)
+    return markup
+
+def digits_keyboard():
+    buttons = []
+    markup = InlineKeyboardMarkup(row_width=10)
+    for item in digits:
+        button_text = f"{item}"
+        button = InlineKeyboardButton(button_text, callback_data=f"{item}-keyb_typing")
+        buttons.append(button)
+    ascii = InlineKeyboardButton(text="🔠 ASCII", callback_data="ascii-keyboard")
+    backspace = InlineKeyboardButton(text="◀️ Backspace", callback_data="backspace-keyb_typing")
+    punctuation = InlineKeyboardButton(text="🔡 Punctuation", callback_data="punctuation-keyboard")
+    markup.add(ascii, punctuation)
+    markup.add(*buttons)
+    markup.add(backspace)
+    return markup
+
+def punctuation_keyboard():
+    buttons = []
+    markup = InlineKeyboardMarkup(row_width=10)
+    for item in punctuation:
+        button_text = f"{item}"
+        button = InlineKeyboardButton(button_text, callback_data=f"{item}-keyb_typing")
+        buttons.append(button)
+    backspace = InlineKeyboardButton(text="◀️ Backspace", callback_data="backspace-keyb_typing")
+    ascii = InlineKeyboardButton(text="🔠 ASCII", callback_data="ascii-keyboard")
+    digits = InlineKeyboardButton(text="🔢 Digits", callback_data="digits-keyboard")
+    markup.add(digits, ascii)
+    markup.add(*buttons)
+    markup.add(backspace)
+    return markup
+
+def ru_keyboard():
+    buttons = []
+    markup = InlineKeyboardMarkup(row_width=8)
+    for item in ru_keyboad_layout:
+        button_text = f"{item}"
+        button = InlineKeyboardButton(button_text, callback_data=f"{item}-keyb_typing")
+        buttons.append(button)
+    to_low = InlineKeyboardButton(text="🔽 To Lower", callback_data="ru-shiftlow")
+    backspace = InlineKeyboardButton(text="◀️ Backspace", callback_data="backspace-keyb_typing")
+    lang = InlineKeyboardButton(text="🇬🇧 Lang", callback_data="en-lang")
+    digits = InlineKeyboardButton(text="🔢 Digits", callback_data="digits-keyboard")
+    punctuation = InlineKeyboardButton(text="🔡 Punctuation", callback_data="punctuation-keyboard")
+    markup.add(digits, punctuation)
+    markup.add(*buttons)
+    markup.add(lang, to_low, backspace)
+    return markup
+
+def ru_lowercase_keyboard():
+    buttons = []
+    markup = InlineKeyboardMarkup(row_width=8)
+    for item in ru_keyboad_layout_lower:
+        button_text = f"{item}"
+        button = InlineKeyboardButton(button_text, callback_data=f"{item}-keyb_typing")
+        buttons.append(button)
+    to_up = InlineKeyboardButton(text="🔼 To Upper", callback_data="ru-shiftup")
+    backspace = InlineKeyboardButton(text="◀️ Backspace", callback_data="backspace-keyb_typing")
+    lang = InlineKeyboardButton(text="🇬🇧 Lang", callback_data="en-lang")
+    digits = InlineKeyboardButton(text="🔢 Digits", callback_data="digits-keyboard")
+    punctuation = InlineKeyboardButton(text="🔡 Punctuation", callback_data="punctuation-keyboard")
+    markup.add(digits, punctuation)
+    markup.add(*buttons)
+    markup.add(lang, to_up, backspace)
+    return markup
+
+def ascii_lowercase_keyboard():
+    buttons = []
+    markup = InlineKeyboardMarkup(row_width=8)
+    for item in keyboard_layout_lower:
+        button_text = f"{item}"
+        button = InlineKeyboardButton(button_text, callback_data=f"{item}-keyb_typing")
+        buttons.append(button)
+    to_up = InlineKeyboardButton(text="🔼 To Upper", callback_data="en-shiftup")
+    backspace = InlineKeyboardButton(text="◀️ Backspace", callback_data="backspace-keyb_typing")
+    lang = InlineKeyboardButton(text="🇷🇺 Lang", callback_data="ru-lang")
+    digits = InlineKeyboardButton(text="🔢 Digits", callback_data="digits-keyboard")
+    punctuation = InlineKeyboardButton(text="🔡 Punctuation", callback_data="punctuation-keyboard")
+    markup.add(digits, punctuation)
+    markup.add(*buttons)
+    markup.add(lang, to_up, backspace)
+    return markup
+
+def ascii_uppercase_keyboard():
+    buttons = []
+    markup = InlineKeyboardMarkup(row_width=10)
+    for item in keyboard_layout:
+        button_text = f"{item}"
+        button = InlineKeyboardButton(button_text, callback_data=f"{item}-keyb_typing")
+        buttons.append(button)
+    to_low = InlineKeyboardButton(text="🔽 To Lower", callback_data="en-shiftlow")
+    backspace = InlineKeyboardButton(text="◀️ Backspace", callback_data="backspace-keyb_typing")
+    lang = InlineKeyboardButton(text="🇷🇺 Lang", callback_data="ru-lang")
+    digits = InlineKeyboardButton(text="🔢 Digits", callback_data="digits-keyboard")
+    punctuation = InlineKeyboardButton(text="🔡 Punctuation", callback_data="punctuation-keyboard")
+    markup.add(digits, punctuation)
+    markup.add(*buttons)
+    markup.add(lang, to_low, backspace)
+    return markup
+
 
 def settings():
     markup = InlineKeyboardMarkup()

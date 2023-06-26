@@ -32,9 +32,10 @@ from aiogram.utils.exceptions import BadRequest
 bot = Bot(f"{data.bot_settings['token']}")
 dp = Dispatcher(bot)
 
+is_running = True
 
 logging.basicConfig(
-    filename="bot.log",
+    filename="bot-logs.txt",
     filemode="a",
     format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
     datefmt="%H:%M:%S",
@@ -44,10 +45,30 @@ logging.basicConfig(
 logger = logging.getLogger("Bot")
 
 
+@dp.message_handler(commands="keyboard")
+async def keyboard(message: types.Message):
+    await message.answer(
+        text="⌨️ Here you can type with your keyboard",
+        reply_markup=markup.ascii_lowercase_keyboard(),
+    )
+
+
+@dp.message_handler(commands="mouse")
+async def mouse(message: types.Message):
+    await message.answer(
+        text="🖱 Here you can move your mouse", reply_markup=markup.mouse_control()
+    )
+
+
 @dp.message_handler(IsAdmin(), commands="help")
 async def help_message(message: types.Message):
     text = (
+        "<b>📚 Help</b>\n\n"
+        "<code>/help</code> - Get help\n"
+        "<code>/keyboard</code> - Get keyboard\n"
+        "<code>/mouse</code> - Get mouse\n"
         "<code>/logs</code> - Get logs\n"
+        "<code>/live</code> - live screen shots\n"
         "<code>/restart</code> - Restart the bot\n"
         "<code>/update</code> - Update the bot\n"
         "<code>/control</code> - Displays a menu to control your PC\n"
@@ -115,7 +136,45 @@ async def get_log_file():
         ImageFormatter(line_numbers=True),
         "fileScreenshot.png",
     )
-    
+
+
+@dp.message_handler(IsAdmin(), commands="live")
+async def live(message: types.Message):
+    await send_live(message.from_user.id)
+
+
+async def send_live(chat_id: int):
+    from random import randint
+    co = randint(0, 100000)
+    try:
+        os.remove("s.png")
+        await utils.screenshot()
+        a = await bot.send_photo(chat_id ,open("s.png", "rb"), reply_markup=markup.live(), caption=f"📸 Скриншот №{co}")
+        os.remove("s.png")
+        while is_running:
+            await utils.screenshot()
+            new_photo = types.InputMediaPhoto(media=open("s.png", "rb"))
+            await a.edit_caption(f"📸 Скриншот №{co}")
+            await a.edit_media(
+                media=new_photo,
+                reply_markup=markup.live(),
+            )
+            os.remove("s.png")
+            await asyncio.sleep(0.8)
+    except FileNotFoundError:
+        await utils.screenshot()
+        a = await bot.send_photo(chat_id ,open("s.png", "rb"), reply_markup=markup.live(), caption=f"📸 Скриншот №{co}")
+        os.remove("s.png")
+        while is_running:
+            await utils.screenshot()
+            new_photo = types.InputMediaPhoto(media=open("s.png", "rb"))
+            await a.edit_caption(f"📸 Скриншот №{co}")
+            await a.edit_media(
+                media=new_photo,
+                reply_markup=markup.live(),
+            )
+            os.remove("s.png")
+            await asyncio.sleep(0.8)
 
 
 @dp.message_handler(IsAdmin(), commands="logs")
@@ -239,6 +298,74 @@ async def say_message(message: types.Message):
 
 @dp.callback_query_handler(IsAdmin())
 async def callbacks(call: types.CallbackQuery):
+    global is_running
+    if call.data == "start-live":
+        if is_running:
+            await call.answer("🤷‍♀️")
+            return
+        await call.message.delete()
+        is_running = True
+        await send_live(call.from_user.id)
+        await call.message.answer("<i>📹 Live stream started</i>", parse_mode="html")
+    if call.data == "stop-live":
+        if is_running:
+            await call.message.answer(
+                "<i>📹 Live stream stopped</i>", parse_mode="html"
+            )
+            is_running = False
+            await call.message.edit_reply_markup(markup.live())
+        else:
+            await call.answer("🤷‍♀️")
+    if "keyboard" in call.data:
+        ind = call.data.index("-keyboard")
+        type = call.data[:ind]
+        if type == "ascii":
+            await call.message.edit_reply_markup(markup.ascii_lowercase_keyboard())
+        if type == "digits":
+            await call.message.edit_reply_markup(markup.digits_keyboard())
+        if type == "punctuation":
+            await call.message.edit_reply_markup(markup.punctuation_keyboard())
+    if "mouse" in call.data:
+        ind = call.data.index("-mouse")
+        action = call.data[:ind]
+        if action == "left":
+            await utils.mouse_left()
+            await call.answer("👍")
+        elif action == "right":
+            await utils.mouse_right()
+            await call.answer("👍")
+        elif action == "up":
+            await utils.mouse_down()
+            await call.answer("👍")
+        elif action == "down":
+            await utils.mouse_up()
+            await call.answer("👍")
+        elif action == "press":
+            await utils.mouse_click()
+            await call.answer("👍")
+    if "lang" in call.data:
+        ind = call.data.index("-lang")
+        lang = call.data[:ind]
+        if lang == "ru":
+            await call.message.edit_reply_markup(markup.ru_lowercase_keyboard())
+        elif lang == "en":
+            await call.message.edit_reply_markup(markup.ascii_lowercase_keyboard())
+    if "shiftlow" in call.data:
+        ind = call.data.index("-shiftlow")
+        lang = call.data[:ind]
+        if lang == "ru":
+            await call.message.edit_reply_markup(markup.ru_lowercase_keyboard())
+        elif lang == "en":
+            await call.message.edit_reply_markup(markup.ascii_lowercase_keyboard())
+    if "shiftup" in call.data:
+        ind = call.data.index("-shiftup")
+        lang = call.data[:ind]
+        if lang == "ru":
+            await call.message.edit_reply_markup(markup.ru_keyboard())
+        elif lang == "en":
+            await call.message.edit_reply_markup(markup.ascii_uppercase_keyboard())
+    if call.data == "shift-low":
+        await call.message.edit_reply_markup(markup.ascii_lowercase_keyboard())
     if call.data == "clear_logs":
         await call.message.delete()
         open("bot.log", "w").close()
@@ -316,6 +443,11 @@ async def callbacks(call: types.CallbackQuery):
             "<i>The text was successfully deleted</i>", parse_mode="html"
         )
         await utils.delete_all()
+    if "keyb_typing" in call.data:
+        ind = call.data.index("-keyb_typing")
+        text = call.data[:ind]
+        await utils.type_text(text)
+        await call.answer("👍")
     if "app" in call.data:
         ind = call.data.index("-app")
         app = call.data[:ind]
@@ -397,9 +529,6 @@ async def callbacks(call: types.CallbackQuery):
             os.system("python3 main.py")
 
 
-
-
-
 async def startup(dp):
     if maindb.get_on_off() == "false":
         await bot.edit_message_text(
@@ -420,11 +549,11 @@ async def startup(dp):
 
 
 async def starts():
-        logger.info("- Version: %s", version.version)
-        logger.info("- Owner: %s", data.tg_id)
-        logger.info("- Number of commands: %s", len(commands.find_commands_in_file()))
-        logger.info("- Release: %s %s", platform.system(), platform.release())
-        await dp.start_polling(bot)
+    logger.info("- Version: %s", version.version)
+    logger.info("- Owner: %s", data.tg_id)
+    logger.info("- Number of commands: %s", len(commands.find_commands_in_file()))
+    logger.info("- Release: %s %s", platform.system(), platform.release())
+    await dp.start_polling(bot)
 
 
 async def battery():
@@ -459,4 +588,4 @@ async def main():
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-    loop.run_forever()      
+    loop.run_forever()
